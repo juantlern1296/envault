@@ -43,3 +43,16 @@ def diff_vault_files(
     old_data = load_vault(old_path, password)
     new_data = load_vault(new_path, password)
     return diff_vaults(old_data, new_data, show_unchanged=show_unchanged)
+
+
+def summarize_diff(entries: List[DiffEntry]) -> Dict[str, int]:
+    """Return a count of each status type in a list of diff entries.
+
+    Useful for quickly checking how many keys were added, removed, or changed
+    without iterating over the full entry list yourself.
+    """
+    summary: Dict[str, int] = {"added": 0, "removed": 0, "changed": 0, "unchanged": 0}
+    for entry in entries:
+        if entry.status in summary:
+            summary[entry.status] += 1
+    return summary
