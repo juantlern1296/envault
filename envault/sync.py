@@ -58,8 +58,11 @@ class S3Backend:
         try:
             self._boto().download_file(bucket, key, str(local))
             return True
-        except botocore.exceptions.ClientError:
-            return False
+        except botocore.exceptions.ClientError as e:
+            error_code = e.response.get("Error", {}).get("Code", "")
+            if error_code in ("404", "NoSuchKey"):
+                return False
+            raise
 
     def exists(self) -> bool:
         import botocore
@@ -67,8 +70,11 @@ class S3Backend:
         try:
             self._boto().head_object(Bucket=bucket, Key=key)
             return True
-        except botocore.exceptions.ClientError:
-            return False
+        except botocore.exceptions.ClientError as e:
+            error_code = e.response.get("Error", {}).get("Code", "")
+            if error_code in ("404", "403"):
+                return False
+            raise
 
 
 def push(local: Path, remote: str) -> None:
