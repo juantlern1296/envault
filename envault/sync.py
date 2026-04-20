@@ -44,7 +44,11 @@ class S3Backend:
     def _parse(self):
         parts = self.url[5:].split("/", 1)
         bucket = parts[0]
+        if not bucket:
+            raise ValueError(f"Invalid S3 URL, missing bucket: {self.url!r}")
         key = parts[1] if len(parts) > 1 else "envault.vault"
+        if not key:
+            raise ValueError(f"Invalid S3 URL, missing key: {self.url!r}")
         return bucket, key
 
     def upload(self, local: Path) -> None:
@@ -79,6 +83,8 @@ class S3Backend:
 
 def push(local: Path, remote: str) -> None:
     """Upload local vault to remote."""
+    if not local.exists():
+        raise FileNotFoundError(f"Local vault file not found: {local}")
     backend = _get_backend(remote)
     backend.upload(local)
 
