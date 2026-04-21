@@ -53,3 +53,13 @@ def test_list_profile_vars(runner, vault_env):
     _run(runner, vault_env, ["set", "staging", "X", "42"])
     result = _run(runner, vault_env, ["list", "staging"])
     assert "X=42" in result.output
+
+
+def test_overwrite_existing_key(runner, vault_env):
+    """Setting a key twice should keep only the latest value."""
+    _run(runner, vault_env, ["set", "dev", "KEY", "original"])
+    _run(runner, vault_env, ["set", "dev", "KEY", "updated"])
+    result = _run(runner, vault_env, ["get", "dev", "KEY"])
+    assert result.exit_code == 0
+    assert "updated" in result.output
+    assert "original" not in result.output
