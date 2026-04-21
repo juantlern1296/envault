@@ -18,7 +18,10 @@ def audit():
 def cmd_list(log, action, limit):
     """Print recent audit log entries."""
     log_path = Path(log) if log else DEFAULT_LOG_PATH
-    entries = read_log(log_path)
+    try:
+        entries = read_log(log_path)
+    except OSError as e:
+        raise click.ClickException(f"Could not read audit log: {e}")
     if action:
         entries = [e for e in entries if e.get("action") == action]
     entries = entries[-limit:]
@@ -37,5 +40,8 @@ def cmd_list(log, action, limit):
 def cmd_clear(log):
     """Delete all audit log entries."""
     log_path = Path(log) if log else DEFAULT_LOG_PATH
-    clear_log(log_path)
+    try:
+        clear_log(log_path)
+    except OSError as e:
+        raise click.ClickException(f"Could not clear audit log: {e}")
     click.echo("Audit log cleared.")
